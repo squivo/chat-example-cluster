@@ -2,16 +2,16 @@ var cluster = require('cluster');
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var redis = require('node-redis');
+var redis = require('redis');
 var redisAdapter = require('socket.io-redis');
 var sticky = require('sticky-session');
 var port = process.env.PORT || 3000;
 var workers = process.env.WORKERS || require('os').cpus().length;
 
-var pub = redis.createClient(9278, 'greeneye.redistogo.com', , {
+var pub = redis.createClient(9278, 'greeneye.redistogo.com', {
   auth_pass: "01c7f8fdd85de3350498b978f41799ac"
 });
-var sub = redis.createClient(9278, 'greeneye.redistogo.com', , {
+var sub = redis.createClient(9278, 'greeneye.redistogo.com', {
   detect_buffers: true,
   auth_pass: "01c7f8fdd85de3350498b978f41799ac"
 });
