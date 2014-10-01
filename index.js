@@ -4,7 +4,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var redis = require('socket.io-redis');
 var sticky = require('sticky-session');
-var port = process.env.NODE_PORT || 3000;
+var port = process.env.PORT || 3000;
 var workers = process.env.WORKERS || require('os').cpus().length;
 
 //io.adapter(redis(process.env.REDISTOGO_URL));
