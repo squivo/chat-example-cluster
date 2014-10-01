@@ -7,7 +7,7 @@ var sticky = require('sticky-session');
 var port = process.env.NODE_PORT || 3000;
 var workers = process.env.WORKERS || require('os').cpus().length;
 
-io.adapter(redis(process.env.REDISTOGO_URL));
+//io.adapter(redis(process.env.REDISTOGO_URL));
 
 app.get('/', function(req, res) {
   res.sendfile('index.html');
@@ -20,6 +20,7 @@ io.on('connection', function(socket) {
 });
 
 if (cluster.isMaster) {
+  stickyStart();
   console.log('start cluster with %s workers', workers - 1);
   workers--;
   for (var i = 0; i < workers; ++i) {
@@ -31,7 +32,7 @@ if (cluster.isMaster) {
     console.log('worker %s died. restart...', worker.process.pid);
   });
 } else {
-  start();
+  stickyStart();
 }
 
 function start() {
