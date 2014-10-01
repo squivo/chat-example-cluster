@@ -7,6 +7,7 @@ var sticky = require('sticky-session');
 var port = process.env.PORT || 3000;
 var workers = process.env.WORKERS || require('os').cpus().length;
 
+console.log(process.env.REDISTOGO_URL);
 io.adapter(redis(process.env.REDISTOGO_URL));
 
 app.get('/', function(req, res) {
