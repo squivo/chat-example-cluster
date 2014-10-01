@@ -7,9 +7,11 @@ var sticky = require('sticky-session');
 var port = process.env.PORT || 3000;
 var workers = process.env.WORKERS || require('os').cpus().length;
 
-console.log('redis://redistogo:01c7f8fdd85de3350498b978f41799ac@greeneye.redistogo.com:9278/');
+var redisUrl = process.env.REDISTOGO_URL || 'redis://redistogo:01c7f8fdd85de3350498b978f41799ac@greeneye.redistogo.com:9278/';
 
-io.adapter(redis(process.env.REDISTOGO_URL));
+console.log(redisUrl);
+
+io.adapter(redis(redisUrl));
 
 app.get('/', function(req, res) {
   res.sendfile('index.html');
