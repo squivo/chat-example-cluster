@@ -47,13 +47,16 @@ function adapter(uri, opts) {
   var prefix = opts.key || 'socket.io';
 
   // init clients if needed
-  if (!pub) pub = socket ? redis(socket) : redis(port, host);
-  if (!sub) sub = socket ? redis(socket, {
-    detect_buffers: true
-  }) : redis(port, host, {
-    detect_buffers: true
-  });
-
+  if (!pub) {
+    pub = socket ? redis(socket) : redis(port, host);
+  }
+  if (!sub) {
+    sub = socket ? redis(socket, {
+      detect_buffers: true
+    }) : redis(port, host, {
+      detect_buffers: true
+    });
+  }
 
   // this server's key
   var uid = uid2(6);
@@ -89,9 +92,12 @@ function adapter(uri, opts) {
    */
 
   Redis.prototype.onmessage = function(pattern, channel, msg) {
-    console.log('broadcast', pattern, channel, msg);
+    console.log('onmessage', pattern, channel, msg);
     var pieces = channel.split('#');
-    if (uid == pieces.pop()) return debug('ignore same uid');
+    if (uid == pieces.pop()) {
+      return debug('ignore same uid');
+    }
+
     var args = msgpack.decode(msg);
 
     if (args[0] && args[0].nsp === undefined) {
@@ -117,9 +123,9 @@ function adapter(uri, opts) {
    */
 
   Redis.prototype.broadcast = function(packet, opts, remote) {
-    console.log('broadcast', packet, opts, remote);
     Adapter.prototype.broadcast.call(this, packet, opts);
     if (!remote) {
+      console.log('broadcast', packet, opts, remote);
       pub.publish(key, msgpack.encode([packet, opts]));
     }
   };

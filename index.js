@@ -20,6 +20,10 @@ var sub = redis.createClient(redisOptions.port, redisOptions.host, {
 });
 
 console.log('Redis adapter started with url: ' + redisUrl);
+io.adapter(redisAdapter({
+  pubClient: pub,
+  subClient: sub
+}));
 
 app.get('/', function(req, res) {
   res.sendfile('index.html');
@@ -49,9 +53,5 @@ if (cluster.isMaster) {
 function start() {
   http.listen(port, function() {
     console.log('listening on *:' + port);
-    io.adapter(redisAdapter({
-      pubClient: pub,
-      subClient: sub
-    }));
   });
 }
