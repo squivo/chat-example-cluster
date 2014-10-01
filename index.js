@@ -3,7 +3,7 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var redis = require('redis');
-var redisAdapter = require('socket.io-redis');
+var redisAdapter = require('./socket.io-redis');
 
 var port = process.env.PORT || 3000;
 var workers = process.env.WORKERS || require('os').cpus().length;
@@ -18,11 +18,6 @@ var sub = redis.createClient(redisOptions.port, redisOptions.host, {
   detect_buffers: true,
   auth_pass: redisOptions.password
 });
-
-io.adapter(redisAdapter({
-  pubClient: pub,
-  subClient: sub
-}));
 
 console.log('Redis adapter started with url: ' + redisUrl);
 
@@ -54,5 +49,9 @@ if (cluster.isMaster) {
 function start() {
   http.listen(port, function() {
     console.log('listening on *:' + port);
+    io.adapter(redisAdapter({
+      pubClient: pub,
+      subClient: sub
+    }));
   });
 }
