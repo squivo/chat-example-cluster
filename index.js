@@ -11,6 +11,7 @@ var workers = process.env.WORKERS || require('os').cpus().length;
 var redisUrl = process.env.REDISTOGO_URL || 'redis://127.0.0.1:6379';
 var redisOptions = require('parse-redis-url')(redis).parse(redisUrl);
 var pub = redis.createClient(redisOptions.port, redisOptions.host, {
+  detect_buffers: true,
   auth_pass: redisOptions.password
 });
 var sub = redis.createClient(redisOptions.port, redisOptions.host, {
