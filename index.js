@@ -3,13 +3,11 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var redis = require('socket.io-redis');
-
-io.adapter(redis({
-  host: 'localhost',
-  port: 6379
-}));
-
+var sticky = require('sticky-session');
+var port = process.env.NODE_PORT || 3000;
 var workers = process.env.WORKERS || require('os').cpus().length;
+
+io.adapter(redis(process.env.REDISTOGO_URL));
 
 app.get('/', function(req, res) {
   res.sendfile('index.html');
@@ -31,10 +29,21 @@ if (cluster.isMaster) {
 
   cluster.on('death', function(worker) {
     console.log('worker %s died. restart...', worker.process.pid);
-    //cluster.fork();
   });
 } else {
-  http.listen(3000, function() {
-    console.log('listening on *:3000');
+  start();
+}
+
+function start() {
+  http.listen(port, function() {
+    console.log('listening on *:' + port);
+  });
+}
+
+function stickyStart() {
+  sticky(function() {
+    return http;
+  }).listen(3000, function() {
+    console.log('listening on *:' + port);
   });
 }
