@@ -24,6 +24,8 @@ io.adapter(redisAdapter({
   subClient: sub
 }));
 
+console.log('Redis adapter started with url: ' + redisUrl);
+
 app.get('/', function(req, res) {
   res.sendfile('index.html');
 });
@@ -35,7 +37,6 @@ io.on('connection', function(socket) {
 });
 
 if (cluster.isMaster) {
-  //start();
   console.log('start cluster with %s workers', workers - 1);
   workers--;
   for (var i = 0; i < workers; ++i) {
