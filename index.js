@@ -1,7 +1,7 @@
 var cluster = require('cluster');
 var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var http = require('http');
+var io = require('socket.io');
 var redis = require('redis');
 var redisAdapter = require('socket.io-redis');
 
@@ -9,32 +9,12 @@ var port = process.env.PORT || 3000;
 var workers = process.env.WORKERS || require('os').cpus().length;
 
 var redisUrl = process.env.REDISTOGO_URL || 'redis://127.0.0.1:6379';
-var redisOptions = require('parse-redis-url')(redis).parse(redisUrl);
-var pub = redis.createClient(redisOptions.port, redisOptions.host, {
-  detect_buffers: true,
-  auth_pass: redisOptions.password
-});
-var sub = redis.createClient(redisOptions.port, redisOptions.host, {
-  detect_buffers: true,
-  auth_pass: redisOptions.password
-});
 
-io.adapter(redisAdapter({
-  pubClient: pub,
-  subClient: sub
-}));
-
-console.log('Redis adapter started with url: ' + redisUrl);
 
 app.get('/', function(req, res) {
   res.sendfile('index.html');
 });
 
-io.on('connection', function(socket) {
-  socket.on('chat message', function(msg) {
-    io.emit('chat message', msg);
-  });
-});
 
 if (cluster.isMaster) {
   console.log('start cluster with %s workers', workers - 1);
@@ -52,7 +32,16 @@ if (cluster.isMaster) {
 }
 
 function start() {
-  http.listen(port, function() {
-    console.log('listening on *:' + port);
+  var httpServer = http.createServer( app );
+  var server = httpServer.listen( port );
+  io = io.listen(server);
+  io.adapter(redisAdapter({ host: 'localhost' , port : 6379 }));
+  io.on('connection', function(socket) {
+  socket.on('chat message', function(msg) {
+    io.emit('chat message', msg);
   });
+});
+
+console.log('Redis adapter started with url: ' + redisUrl);
+
 }
